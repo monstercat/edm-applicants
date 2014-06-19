@@ -1,0 +1,24 @@
+{
+  "name": "edm-applicants",
+  "description": "edm email applicant parser",
+  "keywords": [],
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/monstercat/edm-applicant-parser.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "dependencies": {
+    "cheerio": "^0.17.0",
+    "ent": "^2.0.0",
+    "json-interact": "0.0.1",
+    "xtend": "^3.0.0"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "expect.js": "*"
+  }
+}

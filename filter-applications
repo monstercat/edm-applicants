@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+var interact = require('json-interact');
+var cheerio = require('cheerio');
+var ent = require('ent');
+var xtend = require('xtend');
+
+interact(function(mail, done){
+  if (mail.subject !== "edmDistrict | Apply form") return done();
+
+  var parsed = parse(mail.html);
+  parsed.from = mail.from[0].address;
+  this.push(parsed);
+
+  done();
+});
+
+function parse(body){
+  return {
+    interested: parse.interested(body),
+    name: parse.key('First and Last name', body),
+    email: parse.key('Contact E-mail', body),
+    youtube: parse.url('Youtube', body),
+    beatport: parse.url('Beatport', body),
+    additional: parse.additional(body),
+    brand: {
+      name: parse.key('Brand name', body),
+      type: parse.key('Brand type', body)
+    }
+  };
+}
+
+parse.additional = function(body) {
+  var text = parse.key('Additional information', body);
+  return text.split(/\r?\n/).join('   ').trim();
+};
+
+parse.url = function(type, body) {
+  var reg = new RegExp(type + " URL: (.*)<br");
+  var url = body.match(reg)[1];
+  var $a = cheerio.load(url)('a');
+  return ($a.attr('href') || $a.text()).split("?")[0];
+};
+
+parse.interested = function(body) {
+  var str = parse.key('Interested in', body);
+  var items = str.split(/,\s?/);
+  return {
+    distribute: items.indexOf("distribute") >= 0,
+    manage: items.indexOf("manage") >= 0,
+    earn: items.indexOf("earn") >= 0
+  };
+};
+
+parse.key = function(key, body) {
+  var reg = new RegExp(key + ": ([^<]*)");
+  return ent.decode(body.match(reg)[1]);
+};
